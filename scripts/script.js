@@ -2,15 +2,13 @@ const input = document.querySelector('.search-repos__input')
 const autocompleteList = document.querySelector('.search-repos__autocomplete')
 const reposSelectedList = document.querySelector('.search-repos__selected')
 
-async function searchRepos() {
-	if(input.value === '') {
-		while (autocompleteList.firstChild){
-			autocompleteList.firstChild.remove()
-		}
+async function searchRepos(event) {
+	if(event.target.value === '') {
+		removeList(autocompleteList)
 		return
 	}
 
-	const response = await fetch(`https://api.github.com/search/repositories?q=${input.value}`)
+	const response = await fetch(`https://api.github.com/search/repositories?q=${input.value}&per_page=5`)
 	if(!response.ok){
 		throw new Error('Ошибка получения данных')
 	}
@@ -21,36 +19,34 @@ async function searchRepos() {
 }
 
 function createAutocomleteItem(data) {
-	while (autocompleteList.firstChild){
-		autocompleteList.firstChild.remove()
-	}
+	removeList(autocompleteList)
 
-	fragmentAutocomplete = document.createDocumentFragment()
+	const fragmentAutocomplete = document.createDocumentFragment()
 
-	let counter = 0
 
 	data.forEach(item => {
-		if(counter === 5) {
-			return
-		}
-
 		const li = document.createElement('li')
 		li.classList.add('autocomplete__item')
 		li.textContent = item.name
-		fragmentAutocomplete.appendChild(li)
 
 		li.addEventListener('click', () => {
 			SelectRepos([item])
 			input.value = ''
 		})
-
-		counter++
+		fragmentAutocomplete.appendChild(li)
 	});
 	autocompleteList.appendChild(fragmentAutocomplete)
 }
 
+function removeList(list) {
+	while (list.firstChild){
+		list.firstChild.remove()
+	}
+}
+
 const debounce = (fn, debounceTime) => {
 	let timer
+	
 	return function(...args){
 		clearTimeout(timer)
 		timer = setTimeout(() => {
@@ -59,15 +55,12 @@ const debounce = (fn, debounceTime) => {
 	}
 }
 
-input.addEventListener('keyup', debounce(searchRepos, 500))
-
+input.addEventListener('input', debounce(searchRepos, 500))
 
 
 function SelectRepos(data) {
 	const fragmentSelected = document.createDocumentFragment()
-	while (autocompleteList.firstChild) {
-		autocompleteList.firstChild.remove();
-	}
+	removeList(autocompleteList)
 	
 	data.forEach(item => {
 		const li = document.createElement('li')
