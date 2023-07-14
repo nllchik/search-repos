@@ -8,7 +8,7 @@ async function searchRepos(event) {
 		return
 	}
 
-	const response = await fetch(`https://api.github.com/search/repositories?q=${input.value}&per_page=5`)
+	const response = await fetch(`https://api.github.com/search/repositories?q=${event.target.value}&per_page=5`)
 	if(!response.ok){
 		throw new Error('Ошибка получения данных')
 	}
